@@ -17,26 +17,26 @@ reg clk_div;
 
 //clk division
 always@(posedge clk or posedge reset) begin
-    if(reset) clk_div = 1'd0;
-    else clk_div = ~clk_div;
+    if(reset) clk_div <= 1'd0;
+    else clk_div <= ~clk_div;
 end
 
 //CEN
 always@(*) begin
     if(reset) begin
-        CEN = 1'd0;
+        CEN = 1'd1;
     end else begin
         if(U_LPF.cs <= 3'd1 && U_HPF.cs <= 3'd1)
-            CEN = clk_div;
-        else CEN = 1'd0;
+            CEN = 1'd0;
+        else CEN = 1'd1;
     end
 end
 
 //Ai
-always@(*) begin
-    if(U_LPF.cs <= 3'd1 && U_HPF.cs <= 3'd1) begin
-        if(Ai >= 10'd0) Ai = Ai + 1;
-        else Ai = 10'd0;
+always@(posedge clk_div or posedge reset) begin
+    if(U_LPF.ns <= 3'd1 && U_HPF.ns <= 3'd1) begin
+        if(Ai >= 10'd0) Ai <= Ai + 1;
+        else Ai <= 10'd0;
     end
 end
 
