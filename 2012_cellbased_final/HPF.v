@@ -26,11 +26,10 @@ parameter HH0 = 16'hFFF8,
           HH14 = 16'hFFF0,
           HH15 = 16'h0008;
 //==========================================================================
-reg clk_div;
 reg [2:0] cs, ns;
 reg [4:0] cs_C, ns_C;
 reg [7:0] x [15:0];
-reg [27:0] sum;
+reg [35:0] sum;
 //==========================================================================
 parameter WAIT_X = 3'd0,
           GET_X0 = 3'd1,
@@ -60,14 +59,14 @@ parameter C0 = 5'd0,
 
 //current state
 always@(posedge clk or posedge reset) begin
-    if(reset) cs = RST;
-    else cs = ns;
+    if(reset) cs <= RST;
+    else cs <= ns;
 end
 
 // C current state
 always@(posedge clk or posedge reset) begin
-    if(reset) cs_C = C_RST;
-    else cs_C = ns_C;
+    if(reset) cs_C <= C_RST;
+    else cs_C <= ns_C;
 end
 
 //next state
@@ -125,23 +124,23 @@ end
 
 // x
 integer i;
-always@(*) begin
+always@(posedge clk or posedge reset) begin
     if(cs == RST) begin
         for(i = 0; i <= 15; i = i + 1) begin
-            x[i] = 0;
+            x[i] <= 0;
         end
     end
     else if(cs == WAIT_X) begin
         for(i = 0; i <= 14; i = i + 1) begin
-            x[i] = x[i + 1];
+            x[i] <= x[i + 1];
         end
     end else if(cs == GET_X0) begin
-        if(x_half) x[15][3:0] = x_half;
-        else x[15][3:0] = 4'd0;
+        if(x_half) x[15][3:0] <= x_half;
+        else x[15][3:0] <= 4'd0;
     end
     else if(cs == GET_X1) begin
-        if(x_half)  x[15][7:4] = x_half;
-        else x[15][7:4] = 4'd0;
+        if(x_half)  x[15][7:4] <= x_half;
+        else x[15][7:4] <= 4'd0;
     end
 end
 
@@ -179,12 +178,12 @@ always@(*) begin
         z = (sum[11])
             ? sum[19:12] + 8'd1
             : sum[19:12];
-    end
+    end else z = 0;
 end
 
 //z_valid
 always@(*) begin
-    if(cs == OUT_Z && clk) begin
+    if(cs == OUT_Z) begin
         z_valid = 1'b1;
     end else z_valid = 1'b0;
 end
